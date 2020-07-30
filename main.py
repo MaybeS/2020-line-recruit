@@ -9,29 +9,30 @@ Author: Bae Jiun, Maybe
 
 import argparse
 
-from lib.data import Dataset
-from lib.measure import RMSE
+from lib import measure, data
 from lib.recommender import Recommender
 
 
 def main(args: argparse.Namespace):
-    dataset = Dataset(args.dataset)
+    dataset = data.Dataset(args.dataset)
     train, test = dataset.split_train_test()
 
+    # define criterion as RMSE
+    criterion = measure.RMSE()
     # fit model, using train data
     model = Recommender(factors=args.factor, epochs=args.epoch,
                         mean=args.mean, derivation=args.dev,
                         lr=args.lr, reg=args.reg)
     model.fit(train[:, :2], train[:, 2])
 
-    # predict and calculate RMSE
-    predicts = model.predict(test[:, :2])
-    print('RMSE:', RMSE()(predicts, test[:, 2]))
+    # predict and calculate error
+    predictions = model.predict(test[:, :2])
+    error = criterion(predictions, test[:, 2])
+    print(f'RMSE: {error}')
 
     # save predictions
-    # test = test.drop(test.columns[-1], axis=1)
-    # test[test.columns[-1]] = pd.Series(predicts)
-    # test.to_csv(splitext(test_file)[0] + '.base_prediction.txt', sep='\t', index=None, header=None)
+    test[:, 2] = predictions
+    data.to_csv(args.result, test, header=dataset.rating_headers)
 
 
 if __name__ == '__main__':
@@ -39,6 +40,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str, required=True,
                         help="Dataset directory path")
+    parser.add_argument("--result", type=str, default='result.csv', required=False,
+                        help="Result csv file")
 
     parser.add_argument("--factor", type=int, default=100,
                         help="size of factor")
