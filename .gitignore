@@ -1,0 +1,5 @@
+# Ignore cython compiled binaries
+*.c
+*.so
+*.pyd
+
