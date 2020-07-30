@@ -1,7 +1,9 @@
+#cython: language_level=3
 import numpy as np
 cimport numpy as np
 
 from lib.models import Estimator
+
 
 class SVD(Estimator):
     def __init__(self, factors=100, epochs=20,
@@ -57,7 +59,9 @@ class SVD(Estimator):
                 i = np.where(unique_item == i)[0][0]
 
                 # calculate current error
-                dot = sum(param_item[i, f] * param_user[u, f] for f in range(self.factors))
+                dot = 0
+                for f in range(self.factors):
+                    dot += param_item[i, f] * param_user[u, f]
                 err = r - (mean + biase_user[u] + biase_item[i] + dot)
 
                 # update biases
