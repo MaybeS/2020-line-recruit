@@ -54,7 +54,7 @@ def read_csv(path: str, **kwargs) \
     try:
         with open(path) as f:
             reader = csv.reader(f)
-        headers = next(reader)
+            headers = next(reader)
         values = np.genfromtxt(path, **(opts.update(kwargs) or opts))
         return values, headers
 
