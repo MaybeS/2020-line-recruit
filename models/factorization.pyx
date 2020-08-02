@@ -136,7 +136,7 @@ class MatrixFactorization(Estimator):
                 estimate[e] += bias_user[u]
 
             if known_item:
-                i = self.user_indexer[i]
+                i = self.item_indexer[i]
                 estimate[e] += bias_item[i]
 
             if known_user and known_item:
