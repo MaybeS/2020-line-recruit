@@ -12,7 +12,7 @@ import argparse
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
-from lib import measure, data
+from lib import criterion, data
 
 
 def main(args: argparse.Namespace):
@@ -20,7 +20,7 @@ def main(args: argparse.Namespace):
     pred, *_ = data.read_csv(args.prediction)
 
     # define criterion as RMSE
-    criterion = measure.get(args.method)()
+    criterion = criterion.get(args.method)()
     result = criterion(label[:, 2], pred[:, 2])
 
     print(f'{args.method}: {result}')

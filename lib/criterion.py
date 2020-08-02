@@ -1,7 +1,9 @@
 import numpy as np
 
 
-class Measure:
+class Criterion:
+    """
+    """
     def __init__(self):
         pass
 
@@ -10,14 +12,14 @@ class Measure:
         raise NotImplementedError()
 
 
-class RMSE(Measure):
+class RMSE(Criterion):
     def __call__(self, predictions: np.ndarray, values: np.ndarray) \
             -> float:
         return np.sqrt(np.mean((predictions - values) ** 2))
 
 
 def get(method: str):
-    if method.lower() == 'rmse':
+    if method.strip().lower() == 'rmse':
         return RMSE
 
     raise NotImplementedError(f'{method} is not implemented')

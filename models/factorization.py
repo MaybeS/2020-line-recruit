@@ -1,10 +1,11 @@
 import numpy as np
+from tqdm import tqdm
 
 from lib.models import Estimator
 
 
 class SVD(Estimator):
-    def __init__(self, factors:int = 100, epochs=20,
+    def __init__(self, factors: int = 100, epochs: int = 20,
                  mean: float = .0, derivation: float = .1,
                  lr: float = .005, reg: float = .02,
                  random_state=None):
@@ -23,10 +24,12 @@ class SVD(Estimator):
         self.mean = 0
         self.unique_user = None
         self.unique_item = None
-        self.biase_user = None
-        self.biase_item = None
+        self.bias_user = None
+        self.bias_item = None
         self.param_user = None
         self.param_item = None
+        self.user_indexer = None
+        self.item_indexer = None
 
     def fit(self, X: np.ndarray, y: np.ndarray):
         mean = np.mean(y)
@@ -35,8 +38,8 @@ class SVD(Estimator):
         unique_item = np.unique(X[:, 1])
 
         # Initialize biases
-        biase_user = np.zeros(unique_user.size, dtype=np.double)
-        biase_item = np.zeros(unique_item.size, dtype=np.double)
+        bias_user = np.zeros(unique_user.size, dtype=np.double)
+        bias_item = np.zeros(unique_item.size, dtype=np.double)
 
         # Initialize user and item with random state normal distribution
         param_user = self.state.normal(self.init_mean, self.init_dev,
@@ -44,32 +47,31 @@ class SVD(Estimator):
         param_item = self.state.normal(self.init_mean, self.init_dev,
                                        size=(unique_item.size, self.factors))
 
-        for _ in range(self.epochs):
+        user_indexer = dict(zip(unique_user, np.arange(unique_user.size)))
+        item_indexer = dict(zip(unique_item, np.arange(unique_item.size)))
+
+        for _ in tqdm(range(self.epochs)):
             for (u, i), r in zip(X, y):
-                u = np.where(unique_user == u)[0][0]
-                i = np.where(unique_item == i)[0][0]
+                u = user_indexer[u]
+                i = item_indexer[i]
 
                 # calculate current error
                 dot = sum(param_item[i, f] * param_user[u, f] for f in range(self.factors))
-                err = r - (mean + biase_user[u] + biase_item[i] + dot)
+                err = r - (mean + bias_user[u] + bias_item[i] + dot)
 
                 # update biases
-                biase_user[u] += self.lr * (err - self.reg * biase_user[u])
-                biase_item[i] += self.lr * (err - self.reg * biase_item[i])
+                bias_user[u] += self.lr * (err - self.reg * bias_user[u])
+                bias_item[i] += self.lr * (err - self.reg * bias_item[i])
 
+                # update parameters
                 param_user[u] += self.lr * (err * param_item[i] - self.reg * param_user[u])
-                param_item[i] += self.lr * (err * param_user[u] - self.reg * param_item[u])
-
-                # # update params
-                # for f in range(self.factors):
-                #     param_user[u, f] += self.lr * (err * param_item[i, f] - self.reg * param_user[u, f])
-                #     param_item[i, f] += self.lr * (err * param_user[u, f] - self.reg * param_item[i, f])
+                param_item[i] += self.lr * (err * param_user[u] - self.reg * param_item[i])
 
         self.mean = mean
         self.unique_user = unique_user
         self.unique_item = unique_item
-        self.biase_user = biase_user
-        self.biase_item = biase_item
+        self.bias_user = bias_user
+        self.bias_item = bias_item
         self.param_user = param_user
         self.param_item = param_item
 
@@ -82,12 +84,12 @@ class SVD(Estimator):
             known_item = i in self.unique_item
 
             if known_user:
-                u = np.where(self.unique_user == u)[0][0]
-                estimate[e] += self.biase_user[u]
+                u = self.user_indexer[u]
+                estimate[e] += self.bias_user[u]
 
             if known_item:
-                i = np.where(self.unique_item == i)[0][0]
-                estimate[e] += self.biase_item[i]
+                u = self.user_indexer[u]
+                estimate[e] += self.bias_item[i]
 
             if known_user and known_item:
                 estimate[e] += np.dot(self.param_item[i], self.param_user[u])
