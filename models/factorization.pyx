@@ -12,7 +12,7 @@ from tqdm import tqdm
 from lib.models import Estimator
 
 
-class SVD(Estimator):
+class MatrixFactorization(Estimator):
     def __init__(self, factors=100, epochs=20,
                  mean=.0, derivation=.1, lr=.005,
                  reg=.02, random_state=None):
@@ -136,7 +136,7 @@ class SVD(Estimator):
                 estimate[e] += bias_user[u]
 
             if known_item:
-                u = self.user_indexer[u]
+                i = self.user_indexer[i]
                 estimate[e] += bias_item[i]
 
             if known_user and known_item:

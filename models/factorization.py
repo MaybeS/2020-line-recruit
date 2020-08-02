@@ -4,7 +4,7 @@ from tqdm import tqdm
 from lib.models import Estimator
 
 
-class SVD(Estimator):
+class MatrixFactorization(Estimator):
     def __init__(self, factors: int = 100, epochs: int = 20,
                  mean: float = .0, derivation: float = .1,
                  lr: float = .005, reg: float = .02,
@@ -53,13 +53,13 @@ class SVD(Estimator):
         param_item = self.state.normal(self.init_mean, self.init_dev,
                                        size=(unique_item.size, self.factors))
 
-        user_indexer = dict(zip(unique_user, np.arange(unique_user.size)))
-        item_indexer = dict(zip(unique_item, np.arange(unique_item.size)))
+        self.user_indexer = dict(zip(unique_user, np.arange(unique_user.size)))
+        self.item_indexer = dict(zip(unique_item, np.arange(unique_item.size)))
 
         for _ in tqdm(range(self.epochs)):
             for (u, i), r in zip(X, y):
-                u = user_indexer[u]
-                i = item_indexer[i]
+                u = self.user_indexer[u]
+                i = self.item_indexer[i]
 
                 # calculate current error
                 dot = sum(param_item[i, f] * param_user[u, f] for f in range(self.factors))
@@ -101,7 +101,7 @@ class SVD(Estimator):
                 estimate[e] += self.bias_user[u]
 
             if known_item:
-                u = self.user_indexer[u]
+                i = self.item_indexer[i]
                 estimate[e] += self.bias_item[i]
 
             if known_user and known_item:

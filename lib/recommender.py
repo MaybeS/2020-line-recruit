@@ -9,7 +9,7 @@ from typing import Any
 
 import numpy as np
 
-from models import SVD
+from models import MatrixFactorization
 
 
 class Recommender:
@@ -17,7 +17,7 @@ class Recommender:
     """
 
     def __init__(self, algorithm=None, **kwargs):
-        self.model = (algorithm or SVD)(**kwargs)
+        self.model = (algorithm or MatrixFactorization)(**kwargs)
 
     def fit(self, X: np.ndarray, y: np.ndarray):
         self.model.fit(X.astype(np.long), y.astype(np.float32))

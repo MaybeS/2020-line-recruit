@@ -1,3 +1,3 @@
-__all__ = ['SVD']
+__all__ = ['MatrixFactorization']
 
-from .factorization import SVD
+from .factorization import MatrixFactorization
