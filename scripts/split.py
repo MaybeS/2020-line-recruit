@@ -29,12 +29,13 @@ def main(args: argparse.Namespace):
             name, begin, end = query.split(',')
             begin, end = map(int, (begin, end))
 
-            cropped = content[(begin <= content[:, -1]) & (content[:, -1] <= end)],
+            cropped = content[(begin <= content[:, -1]) & (content[:, -1] <= end)]
             data.to_csv(str(result.joinpath(f'{name}.csv')), cropped, header=header)
 
-        except ValueError:
+        except ValueError as e:
+            print(f'Error: {e}')
             print('format mismatch, each query must be [name,begin_condition,end_condition]')
-            print('But got `{query}`')
+            print(f'But got `{query}`')
             continue
 
 
@@ -50,7 +51,7 @@ if __name__ == '__main__':
     parser.add_argument("--split", nargs='+', default=[
                             'dataset1_train,1104505203,1230735592',
                             'dataset1_test,1230735600,1262271552',
-                            'dataset2_train,789652004,1388502017',
+                            'dataset2_train,789652004,1388502016',
                             'dataset2_test,1388502017,1427784002',
                             'tiny_train,1104505203,1104805203',
                             'tiny_test,1230735600,1230835600',

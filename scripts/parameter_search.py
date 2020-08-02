@@ -24,14 +24,12 @@ from lib.recommender import Recommender
 param_space = None
 train, test = None, None
 test_header = None
+critic = None
 
 
 def runner(args: argparse.Namespace) \
         -> Tuple[argparse.Namespace, float]:
-    global train, test, test_header
-
-    # Set criterion as RMSE
-    critic = criterion.get(args.criterion)()
+    global train, test, test_header, critic
 
     # Fit model, using train data
     model = Recommender(factors=args.factor, epochs=args.epoch,
@@ -140,5 +138,8 @@ if __name__ == '__main__':
 
     result_prefix = Path(default_args.result)
     result_prefix.mkdir(exist_ok=True, parents=True)
+
+    # Set criterion as RMSE
+    critic = criterion.get(default_args.criterion)()
 
     main(default_args)

@@ -19,9 +19,9 @@ def main(args: argparse.Namespace):
     label, *_ = data.read_csv(args.label)
     pred, *_ = data.read_csv(args.prediction)
 
-    # define criterion as RMSE
-    criterion = criterion.get(args.method)()
-    result = criterion(label[:, 2], pred[:, 2])
+    # Set criterion as RMSE
+    critic = criterion.get(args.method)()
+    result = critic(label[:, 2], pred[:, 2])
 
     print(f'{args.method}: {result}')
 

@@ -28,7 +28,7 @@ class Dataset:
             train_min, train_max = 1104505203, 1230735592
             test_min, test_max = 1230735600, 1262271552
         elif mode == 'second':
-            train_min, train_max = 789652004, 1388502017
+            train_min, train_max = 789652004, 1388502016
             test_min, test_max = 1388502017, 1427784002
         elif mode == 'tiny':
             train_min, train_max = 1104505203, 1104555203

@@ -19,9 +19,7 @@ class Recommender:
     def __init__(self, algorithm=None, **kwargs):
         self.model = (algorithm or SVD)(**kwargs)
 
-    def fit(self,
-            X: np.ndarray,
-            y: np.ndarray):
+    def fit(self, X: np.ndarray, y: np.ndarray):
         self.model.fit(X.astype(np.long), y.astype(np.float32))
 
     def predict(self, X: np.ndarray) \

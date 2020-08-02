@@ -9,7 +9,7 @@ class SVD(Estimator):
                  mean: float = .0, derivation: float = .1,
                  lr: float = .005, reg: float = .02,
                  random_state=None):
-        """Perform SVD matrix factorization
+        """Perform matrix factorization
         """
         super(self.__class__, self).__init__()
 
@@ -32,6 +32,12 @@ class SVD(Estimator):
         self.item_indexer = None
 
     def fit(self, X: np.ndarray, y: np.ndarray):
+        """Matrix factorization
+
+        :param X: [user, item] information
+        :param y: ratings to predict
+        """
+
         mean = np.mean(y)
 
         unique_user = np.unique(X[:, 0])
@@ -77,6 +83,13 @@ class SVD(Estimator):
 
     def predict(self, X: np.ndarray) \
             -> np.ndarray:
+        """Make recommendation using bias, param matrix.
+
+        If not known user and known item then return mean value
+
+        :param X: [user, item] information
+        :return: Recommendataion matrix
+        """
 
         estimate = np.full(np.size(X, 0), self.mean)
         for e, (u, i) in enumerate(X):

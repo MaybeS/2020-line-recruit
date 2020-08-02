@@ -37,6 +37,13 @@ class SVD(Estimator):
         self.item_indexer = None
 
     def fit(self, X: np.ndarray, y: np.ndarray):
+        """Matrix factorization
+
+        :param X: [user, item] information
+        :param y: ratings to predict
+        """
+
+        # typedef for cython optimization
         cdef list uniques
         cdef list biases
         cdef list params
@@ -64,6 +71,9 @@ class SVD(Estimator):
         self.user_indexer = dict(zip(unique_user, np.arange(unique_user.size)))
         self.item_indexer = dict(zip(unique_item, np.arange(unique_item.size)))
 
+        # The code below may look a bit different for
+        # cython's limitations and computational efficiency,
+        # but it does the same thing.
         for _ in tqdm(range(self.epochs)):
             for (u, i), r in zip(X, y):
                 u = self.user_indexer[u]
@@ -95,6 +105,15 @@ class SVD(Estimator):
 
     def predict(self, X: np.ndarray) \
             -> np.ndarray:
+        """Make recommendation using bias, param matrix.
+
+        If not known user and known item then return mean value
+
+        :param X: [user, item] information
+        :return: Recommendataion matrix
+        """
+
+        # typedef for cython optimization
         cdef np.ndarray[np.double_t] estimate
         cdef double mean = self.mean
         cdef bint known_user, known_item
