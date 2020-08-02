@@ -9,13 +9,22 @@ Author: Bae Jiun, Maybe
 
 import argparse
 
-from lib import measure, data
+from lib import measure, data, seed
 from lib.recommender import Recommender
 
 
 def main(args: argparse.Namespace):
-    dataset = data.Dataset(args.dataset)
-    train, test = dataset.split_train_test()
+    seed(args.seed)
+
+    # Load dataset
+    if args.dataset:
+        dataset = data.Dataset(args.dataset)
+        train, test = dataset.split_train_test(args.mode)
+        test_header = dataset.rating_headers
+
+    else:
+        train, train_header = data.read_csv(args.train)
+        test, test_header = data.read_csv(args.test)
 
     # define criterion as RMSE
     criterion = measure.RMSE()
@@ -32,16 +41,31 @@ def main(args: argparse.Namespace):
 
     # save predictions
     test[:, 2] = predictions
-    data.to_csv(args.result, test, header=dataset.rating_headers)
+    data.to_csv(args.result, test, header=test_header)
 
 
 if __name__ == '__main__':
     # argument parser
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, required=True,
-                        help="Dataset directory path")
+
+    # Provide single csv file and split automatically
+    parser.add_argument("--dataset", type=str, default='', required=False,
+                        help="Dataset path")
+    parser.add_argument("--mode", type=str, default='train', choices=['train', 'test', 'tiny'],
+                        help="Dataset load mode")
+
+    # Provide each train, test dataset
+    parser.add_argument("--train", type=str, default='', required=False,
+                        help="Train dataset directory path")
+    parser.add_argument("--test", type=str, default='', required=False,
+                        help="Test dataset directory path")
+
     parser.add_argument("--result", type=str, default='result.csv', required=False,
                         help="Result csv file")
+
+    parser.add_argument('-s', '--seed', required=False,
+                        default=42,
+                        help="The answer to life the universe and everything")
 
     parser.add_argument("--factor", type=int, default=100,
                         help="size of factor")

@@ -14,21 +14,27 @@ class Dataset:
         self.path = Path(path)
         self.ratings, self.rating_headers = read_csv(str(self.path.joinpath('ratings.csv')), delimiter=',')
 
-    def split_train_test(self, axis: int = 3,
-                         train_condition: Tuple[int, int] = (1104505203, 1230735592),
-                         test_condition: Tuple[int, int] = (1230735600, 1262271552)) \
+    def split_train_test(self, mode: str, axis: int = -1) \
             -> Tuple[np.ndarray, np.ndarray]:
         """Split dataset to train and test set by condition which apply by `axis`.
 
-        :param axis: condition apply axis
-        :param train_condition: (min, max)
-        :param test_condition: (min, max)
+        :param mode: dataset split mode
+        :param axis: dataset split axis
         :return:
             - Train dataset
             - Test dataset
         """
-        train_min, train_max = train_condition
-        test_min, test_max = test_condition
+        if mode == 'first':
+            train_min, train_max = 1104505203, 1230735592
+            test_min, test_max = 1230735600, 1262271552
+        elif mode == 'second':
+            train_min, train_max = 789652004, 1388502017
+            test_min, test_max = 1388502017, 1427784002
+        elif mode == 'tiny':
+            train_min, train_max = 1104505203, 1104555203
+            test_min, test_max = 1230735600, 1230755600
+        else:
+            raise NotImplementedError(f'{mode} is not implemented')
 
         return (
             self.ratings[(train_min <= self.ratings[:, axis]) & (self.ratings[:, axis] <= train_max)],
@@ -37,7 +43,7 @@ class Dataset:
 
 
 def read_csv(path: str, **kwargs) \
-        -> Tuple[np.ndarray, List[str]]:
+        -> Tuple[np.ndarray, str]:
     """return csv contents and headers
 
     :param path: path to file
@@ -56,7 +62,7 @@ def read_csv(path: str, **kwargs) \
             reader = csv.reader(f)
             headers = next(reader)
         values = np.genfromtxt(path, **(opts.update(kwargs) or opts))
-        return values, headers
+        return values, ','.join(headers)
 
     except StopIteration:
         raise Exception('file not readable')

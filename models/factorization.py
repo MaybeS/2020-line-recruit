@@ -4,9 +4,12 @@ from lib.models import Estimator
 
 
 class SVD(Estimator):
-    def __init__(self, factors=100, epochs=20,
-                 mean=.0, derivation=.1, lr=.005,
-                 reg=.02, random_state=None):
+    def __init__(self, factors:int = 100, epochs=20,
+                 mean: float = .0, derivation: float = .1,
+                 lr: float = .005, reg: float = .02,
+                 random_state=None):
+        """Perform SVD matrix factorization
+        """
         super(self.__class__, self).__init__()
 
         self.state = random_state or np.random.mtrand._rand
@@ -25,22 +28,21 @@ class SVD(Estimator):
         self.param_user = None
         self.param_item = None
 
-    def fit(self,
-            X: np.ndarray,
-            y: np.ndarray):
-
+    def fit(self, X: np.ndarray, y: np.ndarray):
         mean = np.mean(y)
 
         unique_user = np.unique(X[:, 0])
         unique_item = np.unique(X[:, 1])
 
-        biase_user = np.zeros(unique_user.size, np.double)
-        biase_item = np.zeros(unique_item.size, np.double)
+        # Initialize biases
+        biase_user = np.zeros(unique_user.size, dtype=np.double)
+        biase_item = np.zeros(unique_item.size, dtype=np.double)
 
+        # Initialize user and item with random state normal distribution
         param_user = self.state.normal(self.init_mean, self.init_dev,
-                                       (unique_user.size, self.factors))
+                                       size=(unique_user.size, self.factors))
         param_item = self.state.normal(self.init_mean, self.init_dev,
-                                       (unique_item.size, self.factors))
+                                       size=(unique_item.size, self.factors))
 
         for _ in range(self.epochs):
             for (u, i), r in zip(X, y):
@@ -55,10 +57,13 @@ class SVD(Estimator):
                 biase_user[u] += self.lr * (err - self.reg * biase_user[u])
                 biase_item[i] += self.lr * (err - self.reg * biase_item[i])
 
-                # update params
-                for f in range(self.factors):
-                    param_user[u, f] += self.lr * (err * param_item[i, f] - self.reg * param_user[u, f])
-                    param_item[i, f] += self.lr * (err * param_user[u, f] - self.reg * param_item[i, f])
+                param_user[u] += self.lr * (err * param_item[i] - self.reg * param_user[u])
+                param_item[i] += self.lr * (err * param_user[u] - self.reg * param_item[u])
+
+                # # update params
+                # for f in range(self.factors):
+                #     param_user[u, f] += self.lr * (err * param_item[i, f] - self.reg * param_user[u, f])
+                #     param_item[i, f] += self.lr * (err * param_user[u, f] - self.reg * param_item[i, f])
 
         self.mean = mean
         self.unique_user = unique_user
