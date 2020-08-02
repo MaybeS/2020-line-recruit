@@ -114,6 +114,11 @@ Parameter search using `./scripts/parameter_search.py` and `./data/search.json`.
 - best: *0.906* in **Dataset 1** (`./B_results_DS1.csv`).
 - best: *0.945* in **Dataset 2** (`./B_results_DS2.csv`).
 
+To reproduce results, append below parameters when run `main.py`.
+
+- Dataset 1: `--factor 50 --epoch 20 --mean .0 --dev .05 --lr .005 --reg .02`
+- Dataset 2: `--factor 100 --epoch 20 --mean .0 --dev .01 --lr .005 --reg .02`
+
 ### Dataset 1
 
 - train (timestamp condition between 1104505203 and 1230735592, 5187587 rows)
